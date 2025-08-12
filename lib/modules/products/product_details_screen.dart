@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:evencir_task/constants/app_colors.dart';
 import 'package:evencir_task/modules/products/product_details_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProductDetailScreen extends StatelessWidget {
@@ -15,611 +17,318 @@ class ProductDetailScreen extends StatelessWidget {
     final controller = Get.put(ProductDetailController(product));
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: AppColors.whiteColor,
       appBar: AppBar(
-        title: Text(
-          "Product Details",
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-          ),
+        title: Padding(
+          padding:  EdgeInsets.only(left: 20.w),
+          child: Text(
+            "Product Details",
+            style: GoogleFonts.playfairDisplay(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.blackColor,
+              
+          ),),
         ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-        actions: [
-          IconButton(
-            onPressed: controller.toggleFavorite,
-            icon: Obx(() => Icon(
-              controller.isFavorite.value 
-                  ? Icons.favorite 
-                  : Icons.favorite_border,
-              color: controller.isFavorite.value 
-                  ? Colors.red 
-                  : Colors.grey,
-            )),
-          ),
-        ],
+        leading:GestureDetector(
+            onTap: () => Get.back(),
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Image.asset('assets/icons/arrowback.png'),
+            ))
       ),
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Product Images
-            _buildImageCarousel(controller),
-            
-            // Product Details Section
-            Container(
-              color: Colors.white,
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Name and Price
-                  _buildNameAndPrice(),
-                  SizedBox(height: 12.h),
-                  
-                  // Rating and Stock
-                  _buildRatingAndStock(),
-                  SizedBox(height: 16.h),
-                  
-                  // Brand and Category
-                  _buildBrandAndCategory(),
-                  SizedBox(height: 16.h),
-                  
-                  // Description
-                  _buildDescription(),
-                ],
-              ),
-            ),
-            
-            SizedBox(height: 8.h),
-            
-            // Product Specifications
-            _buildSpecifications(),
-            
-            SizedBox(height: 8.h),
-            
-            // Reviews Section
-            _buildReviewsSection(),
-            
-            SizedBox(height: 8.h),
-            
-            // Shipping and Return Policy
-            _buildShippingAndReturn(),
-            
-            SizedBox(height: 100.h), // Space for bottom buttons
-          ],
-        ),
-      ),
-      bottomNavigationBar: _buildBottomBar(controller),
-    );
-  }
-
-  Widget _buildImageCarousel(ProductDetailController controller) {
-    return Container(
-      height: 300.h,
-      child: Stack(
-        children: [
-          PageView.builder(
-            controller: controller.pageController,
-            onPageChanged: controller.updateCurrentImageIndex,
-            itemCount: product.images?.length ?? 1,
-            itemBuilder: (context, index) {
-              final imageUrl = product.images != null && product.images.isNotEmpty
-                  ? product.images[index]
-                  : product.thumbnail;
-              
-              return CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                placeholder: (context, url) => Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(color: Colors.white),
-                ),
-                errorWidget: (context, url, error) => Container(
-                  color: Colors.grey.shade200,
-                  child: Icon(
-                    Icons.image_not_supported,
-                    size: 60.sp,
-                    color: Colors.grey.shade400,
-                  ),
-                ),
-              );
-            },
-          ),
-          
-          // Image Indicators
-          if (product.images != null && product.images.length > 1)
-            Positioned(
-              bottom: 16.h,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  product.images.length,
-                  (index) => Obx(() => Container(
-                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    width: 8.w,
-                    height: 8.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: controller.currentImageIndex.value == index
-                          ? Colors.blue
-                          : Colors.white.withOpacity(0.5),
-                    ),
-                  )),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNameAndPrice() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                product.title,
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                "SKU: ${product.sku}",
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.grey.shade600,
-                ),
-              ),
+              // Product Image
+              _buildProductImage(controller),
+              
+              SizedBox(height: 20.h),
+              
+              // Product Details Section
+              _buildProductDetails(controller),
+              
+              SizedBox(height: 20.h),
+              
+              // Product Gallery
+              _buildProductGallery(),
             ],
           ),
         ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(
-              "\$${product.price}",
-              style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.green.shade600,
-              ),
-            ),
-            if (product.discountPercentage > 0)
-              Text(
-                "${product.discountPercentage.toStringAsFixed(1)}% OFF",
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.red,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-          ],
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildRatingAndStock() {
-    return Row(
-      children: [
-        // Rating
-        Row(
-          children: [
-            ...List.generate(5, (index) {
-              return Icon(
-                index < product.rating.floor()
-                    ? Icons.star
-                    : index < product.rating
-                        ? Icons.star_half
-                        : Icons.star_border,
-                color: Colors.orange,
-                size: 18.sp,
-              );
-            }),
-            SizedBox(width: 8.w),
-            Text(
-              "${product.rating}",
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(width: 4.w),
-            Text(
-              "(${product.reviews?.length ?? 0} reviews)",
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-        
-        Spacer(),
-        
-        // Stock
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-          decoration: BoxDecoration(
-            color: product.stock > 0 ? Colors.green.shade50 : Colors.red.shade50,
-            borderRadius: BorderRadius.circular(4.r),
-          ),
-          child: Text(
-            product.stock > 0 ? "${product.stock} In Stock" : "Out of Stock",
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: product.stock > 0 ? Colors.green.shade700 : Colors.red.shade700,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBrandAndCategory() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildInfoCard("Brand", product.brand),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: _buildInfoCard("Category", product.category.replaceAll('-', ' ').toUpperCase()),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInfoCard(String label, String value) {
+  Widget _buildProductImage(ProductDetailController controller) {
     return Container(
-      padding: EdgeInsets.all(12.w),
+      height: 200.h,
+      width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: Colors.grey.shade200),
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12.r),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12.r),
+        child: CachedNetworkImage(
+          imageUrl: product.thumbnail ?? '',
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(color: Colors.white),
           ),
-          SizedBox(height: 4.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDescription() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Description",
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          product.description,
-          style: TextStyle(
-            fontSize: 14.sp,
-            color: Colors.grey.shade700,
-            height: 1.5,
-          ),
-        ),
-        SizedBox(height: 12.h),
-        
-        // Tags
-        if (product.tags != null && product.tags.isNotEmpty)
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: product.tags.map<Widget>((tag) => Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Text(
-                "#$tag",
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: Colors.blue.shade700,
-                ),
-              ),
-            )).toList(),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildSpecifications() {
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Specifications",
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          
-          _buildSpecRow("Weight", "${product.weight} kg"),
-          _buildSpecRow("Dimensions", "${product.dimensions.width} x ${product.dimensions.height} x ${product.dimensions.depth} cm"),
-          _buildSpecRow("Warranty", product.warrantyInformation),
-          _buildSpecRow("Availability", product.availabilityStatus),
-          _buildSpecRow("Minimum Order", "${product.minimumOrderQuantity} units"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSpecRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.h),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100.w,
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ),
-          Text(
-            ": ",
-            style: TextStyle(fontSize: 14.sp),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReviewsSection() {
-    if (product.reviews == null || product.reviews.isEmpty) {
-      return Container();
-    }
-
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Reviews (${product.reviews.length})",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Navigate to all reviews screen
-                },
-                child: Text("See All"),
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 12.h),
-          
-          // Show first 2 reviews
-          ...product.reviews.take(2).map<Widget>((review) => _buildReviewCard(review)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildReviewCard(dynamic review) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                review.reviewerName,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Spacer(),
-              Row(
-                children: List.generate(5, (index) => Icon(
-                  index < review.rating ? Icons.star : Icons.star_border,
-                  color: Colors.orange,
-                  size: 14.sp,
-                )),
-              ),
-            ],
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            review.comment,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: Colors.grey.shade700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildShippingAndReturn() {
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Shipping & Returns",
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 12.h),
-          
-          Row(
-            children: [
-              Icon(Icons.local_shipping, size: 20.sp, color: Colors.blue),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  product.shippingInformation,
-                  style: TextStyle(fontSize: 14.sp),
-                ),
-              ),
-            ],
-          ),
-          
-          SizedBox(height: 8.h),
-          
-          Row(
-            children: [
-              Icon(Icons.assignment_return, size: 20.sp, color: Colors.green),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  product.returnPolicy,
-                  style: TextStyle(fontSize: 14.sp),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBottomBar(ProductDetailController controller) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
+          errorWidget: (context, url, error) => Container(
             color: Colors.grey.shade200,
-            blurRadius: 8,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Quantity Selector
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Row(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  onPressed: controller.decreaseQuantity,
-                  icon: Icon(Icons.remove, size: 20.sp),
+                Icon(
+                  Icons.image_not_supported,
+                  size: 40.sp,
+                  color: Colors.grey.shade400,
                 ),
-                Obx(() => Text(
-                  "${controller.quantity.value}",
+                SizedBox(height: 8.h),
+                Text(
+                  "Image not available",
                   style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                    fontSize: 12.sp,
                   ),
-                )),
-                IconButton(
-                  onPressed: controller.increaseQuantity,
-                  icon: Icon(Icons.add, size: 20.sp),
                 ),
               ],
             ),
           ),
-          
-          SizedBox(width: 16.w),
-          
-          // Add to Cart Button
-          Expanded(
-            child: ElevatedButton(
-              onPressed: product.stock > 0 ? controller.addToCart : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-              ),
-              child: Text(
-                product.stock > 0 ? "Add to Cart" : "Out of Stock",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductDetails(ProductDetailController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title and Heart Icon
+        Row(
+          children: [
+            Text(
+              "Product Details:",
+              style: GoogleFonts.poppins(
+            fontSize: 18.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
+            ),
+            Spacer(),
+            GestureDetector(
+              onTap: controller.toggleFavorite,
+              child: GetBuilder<ProductDetailController>(
+                builder: (_) => Icon(
+                  controller.isFavorite 
+                      ? Icons.favorite 
+                      : Icons.favorite_border,
+                  color: controller.isFavorite 
+                      ? AppColors.redColor
+                      : AppColors.blackColor,
+                  size: 24.sp,
                 ),
               ),
             ),
+          ],
+        ),
+        
+        SizedBox(height: 16.h),
+        
+        // Product Details
+        _buildDetailRow("Name:", product.title ?? 'N/A'),
+        SizedBox(height: 8.h),
+        
+        _buildDetailRow("Price:", "\$${product.price ?? 0}"),
+        SizedBox(height: 8.h),
+        
+        _buildDetailRow("Category:", _formatCategory(product.category ?? 'N/A')),
+        SizedBox(height: 8.h),
+        
+        _buildDetailRow("Brand:", product.brand ?? 'N/A'),
+        SizedBox(height: 8.h),
+        
+        _buildRatingRow(),
+        SizedBox(height: 8.h),
+        
+        _buildDetailRow("Stock:", "${product.stock ?? 0}"),
+        SizedBox(height: 16.h),
+        
+        // Description
+        Text(
+          "Description:",
+          style: GoogleFonts.poppins(
+            fontSize: 12.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
           ),
-        ],
-      ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          product.description ?? 'No description available',
+          style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w400,
+            
+          ),
+        ),
+      ],
     );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        
+          Text(
+            label,
+            style: GoogleFonts.poppins(
+            fontSize: 12.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
+          ),
+          SizedBox(width: 12.w),
+        
+        Text(
+          value,
+          style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w400,
+            
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRatingRow() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+            "Rating:",
+            style: GoogleFonts.poppins(
+            fontSize: 12.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
+          ),
+     
+        SizedBox(width: 12.w),
+        Text(
+          "${product.rating ?? 0}",
+          style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w400,
+            
+          ),
+        ),
+        SizedBox(width: 4.w),
+        Row(
+          children: List.generate(5, (index) {
+            return Icon(
+              index < (product.rating ?? 0).floor()
+                  ? Icons.star
+                  : index < (product.rating ?? 0)
+                      ? Icons.star_half
+                      : Icons.star_border,
+              color: AppColors.yellowColor,
+              size: 10.sp,
+            );
+          }),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductGallery() {
+    // Get all images including thumbnail
+    List<String> allImages = [];
+    if (product.images != null) {
+      allImages.addAll(List<String>.from(product.images));
+    }
+    if (product.thumbnail != null && !allImages.contains(product.thumbnail)) {
+      allImages.insert(0, product.thumbnail);
+    }
+
+    if (allImages.isEmpty) {
+      return Container();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Product Gallery:",
+          style: GoogleFonts.poppins(
+            fontSize: 12.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
+        ),
+        SizedBox(height: 12.h),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12.w,
+            mainAxisSpacing: 12.h,
+            childAspectRatio: 1,
+          ),
+          itemCount: allImages.length,
+          itemBuilder: (context, index) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: CachedNetworkImage(
+                  imageUrl: allImages[index],
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Container(color: Colors.white),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey.shade200,
+                    child: Icon(
+                      Icons.image_not_supported,
+                      size: 30.sp,
+                      color: Colors.grey.shade400,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  String _formatCategory(String category) {
+    return category.replaceAll('-', ' ').split(' ')
+        .map((word) => word.capitalize)
+        .join(' ');
   }
 }

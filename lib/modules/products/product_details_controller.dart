@@ -1,3 +1,4 @@
+import 'package:evencir_task/modules/favorites/favorites_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -6,9 +7,9 @@ class ProductDetailController extends GetxController {
   
   var currentImageIndex = 0.obs;
   var quantity = 1.obs;
-  var isFavorite = false.obs;
   
   late PageController pageController;
+  late FavoritesController favoritesController;
 
   ProductDetailController(this.product);
 
@@ -16,6 +17,14 @@ class ProductDetailController extends GetxController {
   void onInit() {
     super.onInit();
     pageController = PageController();
+    
+    // Initialize or get existing favorites controller
+    try {
+      favoritesController = FavoritesController.instance;
+    } catch (e) {
+      favoritesController = Get.put(FavoritesController());
+    }
+    
     // Initialize quantity with minimum order quantity
     quantity.value = product.minimumOrderQuantity ?? 1;
   }
@@ -26,17 +35,20 @@ class ProductDetailController extends GetxController {
     super.onClose();
   }
 
+  // Reactive getter for favorite status
+  bool get isFavorite => favoritesController.isFavorite(product);
+
   void updateCurrentImageIndex(int index) {
     currentImageIndex.value = index;
   }
 
   void increaseQuantity() {
-    if (quantity.value < product.stock) {
+    if (quantity.value < (product.stock ?? 0)) {
       quantity.value++;
     } else {
       Get.snackbar(
         "Stock Limit",
-        "Only ${product.stock} items available in stock",
+        "Only ${product.stock ?? 0} items available in stock",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
@@ -60,19 +72,13 @@ class ProductDetailController extends GetxController {
   }
 
   void toggleFavorite() {
-    isFavorite.value = !isFavorite.value;
-    Get.snackbar(
-      isFavorite.value ? "Added to Favorites" : "Removed from Favorites",
-      "${product.title}",
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: isFavorite.value ? Colors.green : Colors.grey,
-      colorText: Colors.white,
-      duration: Duration(seconds: 1),
-    );
+    favoritesController.toggleFavorite(product);
+    // Force UI update
+    update();
   }
 
   void addToCart() {
-    if (product.stock <= 0) {
+    if ((product.stock ?? 0) <= 0) {
       Get.snackbar(
         "Out of Stock",
         "This product is currently out of stock",

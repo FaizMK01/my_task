@@ -1,9 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:evencir_task/constants/app_colors.dart';
 import 'package:evencir_task/modules/categories/products_by_category_controller.dart';
 import 'package:evencir_task/modules/products/product_details_screen.dart';
+import 'package:evencir_task/widgets/custom_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProductByCategory extends StatelessWidget {
@@ -16,48 +19,39 @@ class ProductByCategory extends StatelessWidget {
     final controller = Get.put(ProductByCategoryController(slug));
 
     return Scaffold(
+      backgroundColor: AppColors.whiteColor,
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: GestureDetector(
+            onTap: () => Get.back(),
+            child: Image.asset('assets/icons/arrowback.png')),
+        ),
         title: Text(
           slug.split('-').map((word) => word.capitalize).join(' '),
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          style: GoogleFonts.playfairDisplay(
+            fontSize: 24.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 1,
+        elevation: 0,
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          // Search Bar
-          Container(
-            padding: EdgeInsets.all(16.w),
-            child: TextField(
-              onChanged: controller.updateSearchQuery,
-              decoration: InputDecoration(
-                hintText: "Search products...",
-                prefixIcon: Icon(Icons.search, size: 20.sp),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.blue, width: 2),
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 12.h,
-                ),
-              ),
-            ),
-          ),
-          
-          // Products Grid
+
+          CustomSearchBar(
+            
+            hintText: 'Search Products...',onChanged: controller.updateSearchQuery,
+),
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return _buildShimmerGrid();
+                return _buildShimmerList();
               }
 
               if (controller.error.value.isNotEmpty) {
@@ -70,14 +64,8 @@ class ProductByCategory extends StatelessWidget {
                 return _buildEmptyWidget();
               }
 
-              return GridView.builder(
-                padding: EdgeInsets.all(16.w),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12.w,
-                  mainAxisSpacing: 12.h,
-                  childAspectRatio: 0.75,
-                ),
+              return ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 itemCount: filteredProducts.length,
                 itemBuilder: (context, index) {
                   final product = filteredProducts[index];
@@ -94,118 +82,148 @@ class ProductByCategory extends StatelessWidget {
   Widget _buildProductCard(dynamic product) {
     return GestureDetector(
       onTap: () {
-        // Navigate to product detail screen
         Get.to(() => ProductDetailScreen(product: product));
         print("Tapped on: ${product.title}");
       },
       child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          boxShadow: [
-            BoxShadow(
+          borderRadius: BorderRadius.circular(0), // No border radius to match design
+          border: Border(
+            bottom: BorderSide(
               color: Colors.grey.shade200,
-              blurRadius: 8,
-              offset: Offset(0, 2),
+              width: 1,
             ),
-          ],
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Product Image
-            Expanded(
-              flex: 3,
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
-                child: CachedNetworkImage(
-                  imageUrl: product.thumbnail,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  placeholder: (context, url) => Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: Container(color: Colors.white),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8.r),
+              child: CachedNetworkImage(
+                imageUrl: product.thumbnail,
+                width: double.infinity,
+                height: 200.h,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Shimmer.fromColors(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: Container(
+                    width: double.infinity,
+                    height: 200.h,
+                    color: Colors.white,
                   ),
-                  errorWidget: (context, url, error) => Container(
-                    color: Colors.grey.shade200,
-                    child: Icon(
-                      Icons.image_not_supported,
-                      color: Colors.grey.shade400,
-                      size: 40.sp,
-                    ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  width: double.infinity,
+                  height: 200.h,
+                  color: Colors.grey.shade200,
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey.shade400,
+                    size: 50.sp,
                   ),
                 ),
               ),
             ),
             
+            SizedBox(height: 12.h),
+            
             // Product Details
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: EdgeInsets.all(8.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Product Title
-                    Text(
-                      product.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    
-                    // Brand
-                    Text(
-                      product.brand,
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                    
-                    Spacer(),
-                    
-                    // Price and Rating Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Price
-                        Text(
-                          "\$${product.price}",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade600,
-                          ),
+            Padding(
+              padding: EdgeInsets.only(bottom: 16.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product Title and Price Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Product Title
+                      Expanded(
+                        child: Text(
+                          product.title,
+                          style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
                         ),
-                        
-                        // Rating
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              color: Colors.orange,
-                              size: 14.sp,
-                            ),
-                            SizedBox(width: 2.w),
-                            Text(
-                              "${product.rating}",
-                              style: TextStyle(
-                                fontSize: 10.sp,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      
+                      SizedBox(width: 12.w),
+                      
+                      // Price
+                      Text(
+                        "\$${product.price}",
+                        style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
+                      ),
+                    ],
+                  ),
+                  
+                  SizedBox(height: 4.h),
+                  
+                  // Rating
+                  Row(
+                    children: [
+                      Text(
+                        "${product.rating}",
+                        style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
+                      ),
+                      SizedBox(width: 4.w),
+                      ...List.generate(5, (index) {
+                        return Icon(
+                          index < product.rating.floor()
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: AppColors.yellowColor,
+                          size: 14.sp,
+                        );
+                      }),
+                    ],
+                  ),
+                  
+                  SizedBox(height: 4.h),
+                  
+                  // Brand
+                  Text(
+                    "By ${product.brand}",
+                    style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            color: Colors.blueGrey.shade200,
+            fontWeight: FontWeight.w400,
+            
+          ),
+                  ),
+                  
+                  SizedBox(height: 2.h),
+                  
+                  // Category
+                  Text(
+                    "In ${slug.split('-').map((word) => word.toLowerCase()).join(' ')}",
+                    style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w400,
+            
+          ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -214,23 +232,110 @@ class ProductByCategory extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerGrid() {
-    return GridView.builder(
-      padding: EdgeInsets.all(16.w),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12.w,
-        mainAxisSpacing: 12.h,
-        childAspectRatio: 0.75,
-      ),
-      itemCount: 8,
-      itemBuilder: (context, index) => Shimmer.fromColors(
-        baseColor: Colors.grey[300]!,
-        highlightColor: Colors.grey[100]!,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12.r),
+  Widget _buildShimmerList() {
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      itemCount: 6,
+      itemBuilder: (context, index) => Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image placeholder
+              Container(
+                width: double.infinity,
+                height: 200.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+              
+              SizedBox(height: 12.h),
+              
+              // Content placeholders
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Title placeholder
+                  Container(
+                    width: 200.w,
+                    height: 16.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  
+                  // Price placeholder
+                  Container(
+                    width: 50.w,
+                    height: 18.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                ],
+              ),
+              
+              SizedBox(height: 8.h),
+              
+              // Rating placeholder
+              Row(
+                children: [
+                  Container(
+                    width: 30.w,
+                    height: 14.h,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                  ...List.generate(5, (index) => Padding(
+                    padding: EdgeInsets.only(right: 2.w),
+                    child: Container(
+                      width: 14.w,
+                      height: 14.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
+                  )),
+                ],
+              ),
+              
+              SizedBox(height: 6.h),
+              
+              // Brand placeholder
+              Container(
+                width: 80.w,
+                height: 12.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+              ),
+              
+              SizedBox(height: 4.h),
+              
+              // Category placeholder
+              Container(
+                width: 120.w,
+                height: 12.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+              ),
+              
+              SizedBox(height: 16.h),
+            ],
           ),
         ),
       ),

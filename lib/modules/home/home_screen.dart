@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
   height: 75.h,
   width: 360.w,
   decoration: BoxDecoration(
-    color: Colors.black, // yahan color dena zaroori hai
+    color: Colors.black, 
     borderRadius: BorderRadius.only(
       topRight: Radius.circular(5.r),
       topLeft: Radius.circular(5.r),

@@ -1,8 +1,12 @@
-import 'package:evencir_task/modules/categories/products_by_category_controller.dart';
+import 'package:evencir_task/constants/app_colors.dart';
 import 'package:evencir_task/modules/products/products_controller.dart';
+import 'package:evencir_task/widgets/custom_appbar';
+import 'package:evencir_task/widgets/custom_search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ProductsScreen extends StatelessWidget {
@@ -13,57 +17,16 @@ class ProductsScreen extends StatelessWidget {
     final controller = Get.put(ProductsController());
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Products',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
+      backgroundColor: AppColors.whiteColor,
+      appBar: CustomAppBar(title: "Products"),
       body: Column(
         children: [
-          // Search Bar
-          Container(
-            margin: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: TextField(
-              onChanged: controller.searchProducts,
-              decoration: InputDecoration(
-                hintText: 'Search products...',
-                hintStyle: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 16,
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Colors.grey[500],
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
-              ),
-            ),
-          ),
 
-          // Products List
+          CustomSearchBar(
+            
+            hintText: 'Search Products...',      onChanged: controller.searchProducts,
+),
+          // Products List0
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
@@ -168,11 +131,12 @@ class ProductsScreen extends StatelessWidget {
                     Expanded(
                       child: Text(
                         product.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black87,
-                        ),
+                        style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -180,11 +144,12 @@ class ProductsScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Text(
                       controller.formatPrice(product.price),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                      style: GoogleFonts.poppins(
+            fontSize: 14.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
                     ),
                   ],
                 ),
@@ -194,42 +159,27 @@ class ProductsScreen extends StatelessWidget {
                 // Rating and Brand
                 Row(
                   children: [
+
+
+                    Text(
+                      product.rating.toStringAsFixed(1),
+                      style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w600,
+            
+          ),
+                    ),
                     Text(
                       controller.getRatingStars(product.rating),
-                      style: const TextStyle(
-                        color: Colors.amber,
+                      style:  TextStyle(
+                        color: AppColors.yellowColor,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      product.rating.toStringAsFixed(1),
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Spacer(),
-                    if (product.brand.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          'By ${product.brand}',
-                          style: TextStyle(
-                            color: Colors.blue[700],
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
+                    
+
                   ],
                 ),
 
@@ -238,39 +188,27 @@ class ProductsScreen extends StatelessWidget {
                 // Category
                 if (product.category.isNotEmpty)
                   Text(
-                    'in ${product.category}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
+                    'By ${product.category}',
+                    style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: Colors.grey,
+            fontWeight: FontWeight.w400,
+            
+          ),
+         
+                  ),
+                   const SizedBox(height: 8),
+                  Text(
+                    'In ${product.brand}',
+                    style: GoogleFonts.poppins(
+            fontSize: 10.sp,
+            color: AppColors.blackColor,
+            fontWeight: FontWeight.w400,
+            
+          ),
                   ),
 
-                // Stock Status
-                if (product.availabilityStatus.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: product.isInStock ? Colors.green : Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          product.availabilityStatus,
-                          style: TextStyle(
-                            color: product.isInStock ? Colors.green : Colors.red,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              
               ],
             ),
           ),

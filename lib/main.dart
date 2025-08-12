@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'modules/splash/splash_screen.dart';
 
 void main() {
-  // ✅ Set HTTP overrides for better network performance
   HttpOverrides.global = MyHttpOverrides();
   
   runApp(const MyApp());
@@ -31,7 +30,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// ✅ Custom HTTP overrides for faster API calls
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

@@ -9,11 +9,11 @@ class ScreenHeaderText extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: false,  // agar back button nahi chahiye to
+      automaticallyImplyLeading: false, 
       centerTitle: true,
       toolbarHeight: 80.h,
       title: Padding(
-        padding: EdgeInsets.only(top: 16.h),  // appBar already has some padding, adjust as needed
+        padding: EdgeInsets.only(top: 16.h), 
         child: Text(
           text,
           style: GoogleFonts.playfairDisplay(

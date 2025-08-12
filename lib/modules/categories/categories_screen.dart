@@ -1,9 +1,13 @@
+import 'package:evencir_task/constants/app_colors.dart';
 import 'package:evencir_task/modules/categories/categories_controller.dart';
 import 'package:evencir_task/modules/categories/products_by_category.dart';
+import 'package:evencir_task/widgets/custom_appbar';
+import 'package:evencir_task/widgets/custom_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CategoriesScreen extends StatelessWidget {
@@ -14,43 +18,14 @@ class CategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Categories",
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 1,
-      ),
+      appBar: CustomAppBar(title: "Categories"),
       body: Column(
         children: [
-          // Search Bar
-          Container(
-            padding: EdgeInsets.all(16.w),
-            child: TextField(
-              onChanged: (val) => controller.searchQuery.value = val,
-              decoration: InputDecoration(
-                hintText: "Search categories...",
-                prefixIcon: Icon(Icons.search, size: 20.sp),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.blue, width: 2),
-                ),
-                filled: true,
-                fillColor: Colors.grey.shade50,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16.w,
-                  vertical: 12.h,
-                ),
-              ),
-            ),
-          ),
-          
+
+           CustomSearchBar(
+            
+            hintText: 'Search Products...',onChanged: (val) => controller.searchQuery.value = val,
+),
           // Categories Grid
           Expanded(
             child: Obx(() {
@@ -93,7 +68,7 @@ class CategoriesScreen extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(5.r),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.shade200,
@@ -164,11 +139,12 @@ class CategoriesScreen extends StatelessWidget {
                   ),
                   child: Text(
                     category.name,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: GoogleFonts.poppins(
+            fontSize: 12.sp,
+            color: AppColors.white2,
+            fontWeight: FontWeight.w600,
+            
+          ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
